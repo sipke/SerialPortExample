@@ -102,7 +102,7 @@ public class MainActivity extends AppCompatActivity {
                 String extStorage = Environment.getExternalStorageDirectory().getPath();
                 boolean logging = usbService.ToggleLog(extStorage, "serial.log");
                 if (logging) {
-                    mLogButton.setText("Stop logging incoming \n(" + extStorage + "/" + "<datetime>-serial.log" + ")");
+                    mLogButton.setText("Stop incoming log \n(" + extStorage + "/" + "<datetime>-serial.log" + ")");
                 } else {
                     mLogButton.setText("Log incoming");
                 }
@@ -166,7 +166,6 @@ public class MainActivity extends AppCompatActivity {
             switch (msg.what) {
                 case UsbService.MESSAGE_FROM_SERIAL_PORT:
                     addNewText(mActivity.get().display, (String)msg.obj);
-//                    mActivity.get().display.append(data);
                     break;
                 case UsbService.MESSAGE_USB_DEVICE_INFORMATION:
                     String info = (String) msg.obj;

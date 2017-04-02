@@ -50,7 +50,6 @@ public class UsbService extends Service {
     private UsbSerialDevice serialPort;
     private boolean mLogging = false;
     private FileLogger mLogger;
-    private final Object mFileLock = new Object();
 
     private boolean serialPortConnected;
     /*
@@ -218,14 +217,12 @@ public class UsbService extends Service {
      * to filename prepended with a date. If a failure occurs starting to log, return false.
      */
     public boolean ToggleLog(String path, String filename) {
-        synchronized (mFileLock) {
-            mLogging = !mLogging;
-            if (mLogging) {
-                if (mLogger == null) {
-                    mLogger = new FileLogger(path, filename);
-                } else {
-                    mLogger.NewFile(path, filename);
-                }
+        mLogging = !mLogging;
+        if (mLogging) {
+            if (mLogger == null) {
+                mLogger = new FileLogger(path, filename);
+            } else {
+                mLogger.NewFile(path, filename);
             }
         }
         return mLogging;
@@ -234,10 +231,8 @@ public class UsbService extends Service {
     private void LogToFile(String data)
     {
         try {
-            synchronized (mFileLock) {
-                if (mLogging) {
-                    mLogger.appendLog(data);
-                }
+            if (mLogging) {
+                mLogger.appendLog(data);
             }
         } catch (Exception ex) {}
     }

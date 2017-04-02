@@ -15,6 +15,7 @@ import java.util.Locale;
  */
 public class FileLogger {
     private String mFileName;
+    private final Object mFileLock = new Object();
 
     /**
      * Construct a new FileLogger for a file at path/fileName location.
@@ -34,34 +35,38 @@ public class FileLogger {
      */
     public String NewFile(String path, String baseName)
     {
-        mFileName = path + "/" + FormattedFileName(baseName);
+        synchronized (mFileLock) {
+            mFileName = path + "/" + FormattedFileName(baseName);
+        }
         return mFileName;
     }
+
+    /**
+     * Append the given text to the file.
+     * The file is opened, appended to and closed.
+     *
+     * @param text The text to append to the file.
+     */
     public void appendLog(String text)
     {
-        File logFile = new File(mFileName);
-        if (!logFile.exists())
-        {
-            try
-            {
-                logFile.createNewFile();
+        synchronized (mFileLock) {
+            File logFile = new File(mFileName);
+            if (!logFile.exists()) {
+                try {
+                    logFile.createNewFile();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
-            catch (IOException e)
-            {
+            try {
+                //BufferedWriter for performance, true to set append to file flag
+                BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
+                buf.append(text);
+                buf.flush();
+                buf.close();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
-        }
-        try
-        {
-            //BufferedWriter for performance, true to set append to file flag
-            BufferedWriter buf = new BufferedWriter(new FileWriter(logFile, true));
-            buf.append(text);
-            buf.flush();
-            buf.close();
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
         }
     }
     private String FormattedFileName(String fileName)
